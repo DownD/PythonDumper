@@ -38,7 +38,7 @@ int PythonDumper::getPythonModulesAndFunctions(PythonModuleMap * moduleMap)
 int PythonDumper::getPythonModulesAndFunctions(PythonModuleMap* moduleMap, std::vector<std::string>* excludeModules)
 {
 	if (!Py_IsInitialized())
-		return NULL;
+		return NULL;	//Python not initilized
 	BuiltinModules builtModulesMap;
 	getBuiltInModules(&builtModulesMap);
 

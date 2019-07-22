@@ -12,7 +12,10 @@ typedef std::map<std::string, FunctionMap> PythonModuleMap;
 class PythonDumper {
 
 public:
+	//No exclude modules
 	static int getPythonModulesAndFunctions(PythonModuleMap* moduleMap);
+
+	//Allows to specify some modules to be excluded from the dump
 	static int getPythonModulesAndFunctions(PythonModuleMap* moduleMap,std::vector<std::string>* excludeModules);
 
 private:
