@@ -1,7 +1,7 @@
 #include "PythonDumper.h"
 
 
-bool PythonDumper::getPythonFunctionMap(PyObject* module, FunctionMap* map) {
+bool PythonDumper::getPythonModuleMap(PyObject* module, FunctionMap* mapFunc, IntegerMap* mapInt) {
 	PyObject *func_dict = PyModule_GetDict(module);
 	if (!PyDict_Check(func_dict)) {
 		return false;
@@ -10,13 +10,16 @@ bool PythonDumper::getPythonFunctionMap(PyObject* module, FunctionMap* map) {
 	Py_ssize_t pos = 0;
 
 	while (PyDict_Next(func_dict, &pos, &func_key, &func_value)) {
-		if (!PyCFunction_Check(func_value)) {
-			continue;
+		if (PyCFunction_Check(func_value)) {
+			std::string func_name(PyString_AsString(func_key));
+			PyCFunction func = PyCFunction_GET_FUNCTION(func_value);
+			mapFunc->insert({ func_name,func });
 		}
-		std::string func_name(PyString_AsString(func_key));
-		PyCFunction func = PyCFunction_GET_FUNCTION(func_value);
-		PyFunctionObject obj;
-		map->insert({ func_name,func });
+		else if (PyInt_Check(func_value)) {
+			std::string func_name(PyString_AsString(func_key));
+			int value = PyInt_AsLong(func_value);
+			mapInt->insert({ func_name,value });
+		}
 	}
 }
 
@@ -63,8 +66,8 @@ int PythonDumper::getPythonModulesAndFunctions(PythonModuleMap* moduleMap, std::
 		if (builtModulesMap.find(moduleName) != builtModulesMap.end())
 			continue;
 
-		FunctionMap* funcMap = &(moduleMap->insert({ moduleName,FunctionMap() }).first->second);
-		getPythonFunctionMap(module_value, funcMap);
+		Methods* methods = &(moduleMap->insert({ moduleName,Methods() }).first->second);
+		getPythonModuleMap(module_value, &methods->functions,&methods->integerVariables);
 	}
 	return 1;
 }

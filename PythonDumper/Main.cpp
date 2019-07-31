@@ -27,8 +27,15 @@ void printModules() {
 
 	for (auto mod : moduleMap) {
 		printf("\n----------\nModule %s\n----------\n\n", mod.first.c_str());
-		for (auto func : mod.second) {
+
+		printf("Function\n----------\n");
+		for (auto func : mod.second.functions) {
 			printf("%s : %#x\n", func.first.c_str(), func.second);
+		}
+
+		printf("\n----------\nIntVariables\n----------\n");
+		for (auto var : mod.second.integerVariables) {
+			printf("%s : %d\n", var.first.c_str(), var.second);
 		}
 	}
 }
@@ -56,6 +63,7 @@ void menu() {
 	}
 	if (answer == 2) {
 		printModules();
+		system("pause");
 		return;
 	}
 	system("cls");
