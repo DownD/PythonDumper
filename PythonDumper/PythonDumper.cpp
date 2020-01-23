@@ -6,12 +6,12 @@ bool pythonExecuteFile(char* filePath) {
 	strcpy(arr, filePath);
 	PathStripPathA(arr);
 
-	PyObject* PyFileObject = PyFile_FromString(filePath, (char*)"r+");
+	PyObject* PyFileObject = PyFile_FromString(filePath, (char*)"r");
 	if (PyFileObject == NULL) {
 		printf("Error Not a File\n");
 		return 0;
 	}
-	int result = PyRun_SimpleFile(PyFile_AsFile(PyFileObject), "MyFile");
+	int result = PyRun_SimpleFileEx(PyFile_AsFile(PyFileObject), "MyFile",1);
 	if (result == -1)
 		return false;
 	else
