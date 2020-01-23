@@ -1,4 +1,6 @@
 #include "PythonDumper.h"
+#include "Python.h"
+#include "SleepFunctionHook.h"
 
 
 HMODULE mod;
@@ -40,11 +42,32 @@ void printModules() {
 	}
 }
 
+std::string *path;
+static bool pass = 0;
+
+void functionHook() {
+	if (pass)
+		return;
+	pass = true;
+	printf("Injecting from: %s\n", *path);
+	if (pythonExecuteFile((char*)path->c_str())) {
+		printf("Success\n");
+		return;
+	}
+	else {
+		printf(" Fail To Inject\n");
+	}
+	return;
+}
+
 
 void menu() {
+	system("cls");
 	printf("Type the number associeted with the type of dump.\n");
 	printf("1 - To File\n");
 	printf("2 - On Screen\n");
+	printf("3 - Execute File (As to be named as python.py)\n");
+	printf("4 - Exit\n");
 
 	int answer = 0;
 	scanf("%d", &answer);
@@ -61,13 +84,32 @@ void menu() {
 		system("pause");
 		return;
 	}
+	if (answer == 3) {
+		pass = false;
+		char dllPath[MAX_PATH] = { 0 };
+		getCurrentPath(mod, dllPath, MAX_PATH);
+		path = new std::string(dllPath);
+		path->append("python.py");
+		Hook* hook = SleepFunctionHook::setupHook(functionHook);
+		hook->HookFunction();
+
+		//printf("Press any key after injection\n");
+		system("pause");
+		hook->UnHookFunction();
+		delete path;
+		delete hook;
+		return menu();
+	}
 	if (answer == 2) {
 		printModules();
 		system("pause");
 		return;
 	}
+	if (answer == 4) {
+		return;
+	}
 	system("cls");
-	menu();
+	return menu();
 }
 
 void Leave() {

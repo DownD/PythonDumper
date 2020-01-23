@@ -16,6 +16,8 @@ struct Methods {
 
 typedef std::map<std::string, Methods> PythonModuleMap;
 
+bool pythonExecuteFile(char* filePath);
+
 class PythonDumper {
 
 public:

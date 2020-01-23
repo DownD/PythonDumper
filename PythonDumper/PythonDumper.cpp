@@ -1,5 +1,22 @@
 #include "PythonDumper.h"
+#include "shlwapi.h"
 
+bool pythonExecuteFile(char* filePath) {
+	char* arr = new char[strlen(filePath)];
+	strcpy(arr, filePath);
+	PathStripPathA(arr);
+
+	PyObject* PyFileObject = PyFile_FromString(filePath, (char*)"r+");
+	if (PyFileObject == NULL) {
+		printf("Error Not a File\n");
+		return 0;
+	}
+	int result = PyRun_SimpleFile(PyFile_AsFile(PyFileObject), "MyFile");
+	if (result == -1)
+		return false;
+	else
+		return true;
+}
 
 bool PythonDumper::getPythonModuleMap(PyObject* module, FunctionMap* mapFunc, IntegerMap* mapInt) {
 	PyObject *func_dict = PyModule_GetDict(module);
