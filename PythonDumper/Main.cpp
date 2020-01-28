@@ -42,15 +42,17 @@ void printModules() {
 	}
 }
 
-std::string *path;
-static bool pass = 0;
+static std::string path;
+static bool pass = true;
+Hook* hook;
 
 void functionHook() {
 	if (pass)
 		return;
 	pass = true;
-	printf("Injecting from: %s\n", *path);
-	if (pythonExecuteFile((char*)path->c_str())) {
+	printf("Thread ID: %d\n", GetCurrentThreadId());
+	printf("Injecting from: %s\n", path);
+	if (pythonExecuteFile((char*)path.c_str())) {
 		printf("Success\n");
 		return;
 	}
@@ -85,19 +87,14 @@ void menu() {
 		return;
 	}
 	if (answer == 3) {
-		pass = false;
 		char dllPath[MAX_PATH] = { 0 };
 		getCurrentPath(mod, dllPath, MAX_PATH);
-		path = new std::string(dllPath);
-		path->append("python.py");
-		Hook* hook = SleepFunctionHook::setupHook(functionHook);
-		hook->HookFunction();
-
+		path = std::string(dllPath);
+		path.append("python.py");
+		pass = false;
+		int a = 0;
 		//printf("Press any key after injection\n");
-		system("pause");
-		hook->UnHookFunction();
-		delete path;
-		delete hook;
+		scanf("%d", &a);
 		return menu();
 	}
 	if (answer == 2) {
@@ -134,7 +131,11 @@ void SetupConsole()
 DWORD WINAPI ThreadProc(LPVOID lpParameter)
 {
 	SetupConsole();
+	hook = SleepFunctionHook::setupHook(functionHook);
+	hook->HookFunction();
 	menu();
+	hook->UnHookFunction();
+	delete hook;
 	Leave();
 	return true;
 }
