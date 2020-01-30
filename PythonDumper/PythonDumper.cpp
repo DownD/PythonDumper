@@ -1,17 +1,42 @@
 #include "PythonDumper.h"
 #include "shlwapi.h"
 
-bool pythonExecuteFile(char* filePath) {
-	char* arr = new char[strlen(filePath)];
-	strcpy(arr, filePath);
-	PathStripPathA(arr);
-
-	PyObject* PyFileObject = PyFile_FromString(filePath, (char*)"r");
-	if (PyFileObject == NULL) {
-		printf("Error Not a File\n");
-		return 0;
+bool setupPython()
+{
+	HMODULE mod = GetModuleHandle(L"python27");
+	if (!mod) {
+		DEBUG_INFO("Error finding Python27 dll for hooking %d", GetLastError()); return NULL;
 	}
-	int result = PyRun_SimpleFileEx(PyFile_AsFile(PyFileObject), "MyFile",1);
+
+	PyRunSimpleFileEx = (tPyRunSimpleFileEx)GetProcAddress(mod, "PyRun_SimpleFileEx");
+	if (!PyRunSimpleFileEx) { DEBUG_INFO("Error finding PyRunSimpleFileEx function for Hooking Error Code: %d", GetLastError()); return NULL; }
+	PyFileFromString = (tPyFileFromString)GetProcAddress(mod, "PyFile_FromString");
+	if (!PyFileFromString) { DEBUG_INFO("Error finding PyFileFromString function for Hooking Error Code: %d", GetLastError()); return NULL; }
+	return true;
+}
+
+bool pythonExecuteFile(char* filePath) {
+	//char* arr = new char[strlen(filePath)];
+	//strcpy(arr, filePath);
+	//PathStripPathA(arr);
+	int result = -1;
+	//__try {
+		PyObject* PyFileObject = PyFileFromString(filePath, (char*)"r");
+		printf("1\n");
+		//FILE* f = fopen(arr, "r");
+		printf("2\n");
+		if (PyFileObject == NULL) {
+			printf("Error Not a File\n");
+			//delete[] arr;
+			return 0;
+		}
+		result = PyRunSimpleFileEx(PyFile_AsFile(PyFileObject), "somethig", 1);
+		printf("3\n");
+	//}__finally{
+		//printf("Exception\n");
+	//}
+	//delete[] arr;
+	printf("Returning\n");
 	if (result == -1)
 		return false;
 	else
@@ -50,6 +75,7 @@ bool PythonDumper::getBuiltInModules(BuiltinModules* mod) {
 		std::string nameStr(PyString_AsString(name));
 		mod->insert({ nameStr,nameStr });
 	}
+	return true;
 }
 int PythonDumper::getPythonModulesAndFunctions(PythonModuleMap * moduleMap)
 {

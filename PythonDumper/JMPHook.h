@@ -1,6 +1,6 @@
 #pragma once
 #include "Hook.h"
-#include <Windows.h>
+#include <windows.h>
 #include <unordered_map>
 #include "Util.h"
 

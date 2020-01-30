@@ -50,14 +50,14 @@ void functionHook() {
 	if (pass)
 		return;
 	pass = true;
-	printf("Thread ID: %d\n", GetCurrentThreadId());
-	printf("Injecting from: %s\n", path);
+	//printf("Thread ID: %d\n", GetCurrentThreadId());
+	printf("Injecting from: %s\n", path.c_str());
 	if (pythonExecuteFile((char*)path.c_str())) {
-		printf("Success\n");
+		//printf("Success\n");
 		return;
 	}
 	else {
-		printf(" Fail To Inject\n");
+		//printf(" Fail To Inject\n");
 	}
 	return;
 }
@@ -92,9 +92,8 @@ void menu() {
 		path = std::string(dllPath);
 		path.append("python.py");
 		pass = false;
-		int a = 0;
 		//printf("Press any key after injection\n");
-		scanf("%d", &a);
+		system("pause");
 		return menu();
 	}
 	if (answer == 2) {
@@ -131,7 +130,18 @@ void SetupConsole()
 DWORD WINAPI ThreadProc(LPVOID lpParameter)
 {
 	SetupConsole();
-	hook = SleepFunctionHook::setupHook(functionHook);
+	hook = SleepFunctionHook::setupUpdateHook(functionHook);
+	if (!hook) {
+		printf("Fail to Hook Function\n"); 
+		system("pause");
+		Leave();
+		return true;
+	}
+	if (!setupPython()) {
+		system("pause");
+		Leave();
+		return true;
+	}
 	hook->HookFunction();
 	menu();
 	hook->UnHookFunction();

@@ -4,10 +4,13 @@
 #include <Windows.h>
 #include <map>
 #include <unordered_map>
+#include "Util.h"
 
 
 typedef std::map<std::string, PyCFunction> FunctionMap;
 typedef std::map<std::string, int> IntegerMap;
+typedef int (*tPyRunSimpleFileEx)(FILE* fp, const char*filename, int closeit);
+typedef PyObject*(*tPyFileFromString)(char*, char*);
 
 struct Methods {
 	FunctionMap functions;
@@ -16,6 +19,10 @@ struct Methods {
 
 typedef std::map<std::string, Methods> PythonModuleMap;
 
+static tPyRunSimpleFileEx PyRunSimpleFileEx = 0;
+static tPyFileFromString PyFileFromString = 0;
+
+bool setupPython();
 bool pythonExecuteFile(char* filePath);
 
 class PythonDumper {

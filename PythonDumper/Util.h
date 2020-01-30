@@ -5,6 +5,8 @@
 #include <string>
 #include <sstream> 
 
+#define DEBUG_INFO(...); {printf(__VA_ARGS__); printf("\n");}
+
 
 
 int split(char* str, char c, std::vector<std::string>* vec);
